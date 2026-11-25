@@ -1,0 +1,41 @@
+{
+  "id": "welcome",
+  "title": "Welcome to Plugo",
+  "createdAt": "2026-11-25T15:57:01.6886322Z",
+  "updatedAt": "2026-11-25T15:57:33.8970861Z",
+  "cells": [
+    {
+      "id": "cwelcome1",
+      "type": "markdown",
+      "source": "# Welcome to Plugo\n\n**Plugo** is a lightweight, Go-native notebook. Every notebook combines **Markdown** cells with **compiled Go** cells powered directly by your local Go toolchain.\n\n### What makes Plugo Go-native?\n- **Zero boilerplate**: write Go statements directly — no need to wrap every cell in `package main` and `func main()`.\n- **Shared package scope**: `type`, `func`, `const`, `var`, and `import` declarations defined in earlier cells are automatically shared with cells below.\n- **Smart stdlib imports**: use standard packages like `fmt`, `strings`, `slices`, or `time` right away — Plugo resolves them automatically and prunes unused imports.\n- **Native tooling**: format any cell with `gofmt` (`Alt+Shift+F`), inspect the generated Go source, or export the whole notebook to a single `.go` file.\n\n\u003e Press **`Shift+Enter`** inside any cell to run Go code or render Markdown."
+    },
+    {
+      "id": "cwelcome2",
+      "type": "code",
+      "source": "// Declarations here become part of the shared notebook package.\nconst AppName = \"Plugo\"\n\ntype Gopher struct {\n\tName   string\n\tSkills []string\n}\n\nfunc (g Gopher) Introduce() string {\n\treturn fmt.Sprintf(\"Hi, I'm %s! I love %s.\", g.Name, strings.Join(g.Skills, \", \"))\n}\n\ng := Gopher{\n\tName:   \"Gophy\",\n\tSkills: []string{\"goroutines\", \"channels\", \"fast compiles\"},\n}\nfmt.Printf(\"[%s] %s\\n\", AppName, g.Introduce())\n",
+      "execCount": 1,
+      "output": {
+        "status": "ok",
+        "stdout": "[Plugo] Hi, I'm Gophy! I love goroutines, channels, fast compiles.\n",
+        "exitCode": 0,
+        "durationMs": 873,
+        "autoImports": [
+          "fmt",
+          "strings"
+        ],
+        "generatedSource": "package main\n\nimport (\n\t\"fmt\"\n\t\"strings\"\n)\n\nconst AppName = \"Plugo\"\n\ntype Gopher struct {\n\tName   string\n\tSkills []string\n}\n\nfunc (g Gopher) Introduce() string {\n\treturn fmt.Sprintf(\"Hi, I'm %s! I love %s.\", g.Name, strings.Join(g.Skills, \", \"))\n}\n\nfunc main() {\n\tg := Gopher{\n\t\tName:   \"Gophy\",\n\t\tSkills: []string{\"goroutines\", \"channels\", \"fast compiles\"},\n\t}\n\tfmt.Printf(\"[%s] %s\\n\", AppName, g.Introduce())\n}\n",
+        "ranAt": "2026-11-25T15:57:33Z"
+      }
+    },
+    {
+      "id": "cwelcome3",
+      "type": "markdown",
+      "source": "## Reusing Shared Declarations \u0026 Concurrency\n\nBecause **Plugo** compiles with the real Go compiler, you get full generics, goroutines, channels, and standard library support. The cell below reuses `Gopher` and `AppName` from above:"
+    },
+    {
+      "id": "cwelcome4",
+      "type": "code",
+      "source": "team := []Gopher{\n\t{Name: \"Ada\", Skills: []string{\"generics\", \"slices\"}},\n\t{Name: \"Ken\", Skills: []string{\"compilers\", \"simplicity\"}},\n\t{Name: \"Rob\", Skills: []string{\"concurrency\", \"interfaces\"}},\n}\n\nresults := make(chan string, len(team))\nvar wg sync.WaitGroup\n\nfor _, member := range team {\n\twg.Add(1)\n\tgo func(g Gopher) {\n\t\tdefer wg.Done()\n\t\tresults \u003c- g.Introduce()\n\t}(member)\n}\n\nwg.Wait()\nclose(results)\n\nlines := make([]string, 0, len(team))\nfor msg := range results {\n\tlines = append(lines, msg)\n}\nslices.Sort(lines)\n\nfmt.Printf(\"=== %s Team (%d members) ===\\n\", AppName, len(lines))\nfor _, line := range lines {\n\tfmt.Println(\"•\", line)\n}\n"
+    }
+  ]
+}
